@@ -1,0 +1,32 @@
+
+services:
+  echo-client:
+    image: golang:alpine
+    networks:
+      - example
+    command:
+      - "/bin/sh"
+      - "-c"
+      - "wget http://echo-server:8080/users/123 && cat 123"
+    depends_on:
+      - echo-server
+  echo-server:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    ports:
+      - "8080:80"
+    networks:
+      - example
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "4317:4317"    # OTLP gRPC
+      - "4318:4318"    # OTLP HTTP
+
+networks:
+  example:
